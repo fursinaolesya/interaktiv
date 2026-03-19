@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактив: проверка обоснованности санкций СМО по ЭКМП</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f0f5fa;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #004080;
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            border-left: 8px solid #0077be;
+            padding-left: 1.5rem;
+        }
+        .subhead {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            margin-top: 0.5rem;
+            padding-left: 2.5rem;
+            opacity: 0.8;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* карточки */
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px -8px rgba(0, 40, 80, 0.2);
+            padding: 28px;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(2px);
+            margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #b0d4f0;
+            padding-bottom: 12px;
+        }
+        .card-header h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 1.7rem;
+            color: #003366;
+        }
+        .card-header .emoji {
+            font-size: 2.2rem;
+        }
+        .params {
+            background: #f9fcff;
+            border-radius: 20px;
+            padding: 16px 20px;
+            border: 1px solid #c9e2ff;
+        }
+        .field {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+        .field label {
+            font-weight: 600;
+            min-width: 220px;
+            color: #1e3a5f;
+            font-size: 1rem;
+        }
+        .field .hint {
+            font-size: 0.85rem;
+            color: #5a6e7f;
+            margin-top: 4px;
+            width: 100%;
+            padding-left: 220px;
+        }
+        input, select {
+            background: white;
+            border: 1px solid #b8d1e9;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            width: 240px;
+            max-width: 100%;
+            transition: 0.15s;
+            font-family: inherit;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0077be;
+            box-shadow: 0 0 0 3px rgba(0,119,190,0.2);
+        }
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            min-width: auto;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn {
+            background: #004b8f;
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #00284d, 0 8px 18px rgba(0,60,120,0.3);
+            transition: 0.08s linear;
+            width: 100%;
+            margin-top: 10px;
+            letter-spacing: 0.3px;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #00284d, 0 5px 12px rgba(0,60,120,0.3);
+        }
+        .result-block {
+            background: #e2f0fa;
+            border-radius: 32px;
+            padding: 28px;
+            border-left: 12px solid #ffaa33;
+            margin-top: 30px;
+        }
+        .verdict {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .details {
+            background: white;
+            border-radius: 20px;
+            padding: 18px 22px;
+            line-height: 1.6;
+            border: 1px solid #c9ddf2;
+        }
+        .badge {
+            background: #ffecb3;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(0,20,50,0.08);
+            margin: 20px 0;
+        }
+        th {
+            background: #004080;
+            color: white;
+            font-weight: 500;
+            padding: 12px 8px;
+            font-size: 0.9rem;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #dbeafe;
+        }
+        .spoiler {
+            background: #f0f7fe;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin: 25px 0 10px;
+            cursor: pointer;
+            border: 1px dashed #6fa3d9;
+        }
+        .spoiler summary {
+            font-weight: 700;
+            color: #003b70;
+            font-size: 1.2rem;
+        }
+        .footnote {
+            color: #3e5e7a;
+            font-size: 0.9rem;
+            border-top: 1px solid #aac6e3;
+            padding-top: 18px;
+            margin-top: 25px;
+        }
+        .highlight {
+            background: #fef9e4;
+            padding: 15px;
+            border-radius: 16px;
+            border-left: 6px solid #f4b836;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚖️ Проверка обоснованности санкций СМО</h1>
+    <div class="subhead">на основе Приказов №231н, №120н, требований к экспертизе качества медпомощи (ЭКМП)</div>
+
+    <div class="grid">
+        <!-- ЛЕВАЯ КОЛОНКА: интерактивная проверка -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="emoji">🔍</span>
+                    <h2>Чек-лист процедуры ЭКМП</h2>
+                </div>
+                <div class="params">
+                    <div class="field">
+                        <label>📅 Дата завершения ЭКМП (из акта):</label>
+                        <input type="date" id="dateEnd" value="2026-03-10">
+                    </div>
+                    <div class="field">
+                        <label>📨 Дата получения акта клиникой:</label>
+                        <input type="date" id="dateReceive" value="2026-03-18">
+                        <div class="hint">Если акт получен позже 5 рабочих дней — нарушение срока (код 9.2)</div>
+                    </div>
+                    
+                    <div class="field">
+                        <label>🏥 Тип помощи для проверки выборки:</label>
+                        <select id="helpType">
+                            <option value="stab">Стационар (норма 5%)</option>
+                            <option value="day">Дневной стационар (3%)</option>
+                            <option value="amb">Амбулаторная помощь (0,5%)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>📊 Всего законченных случаев в периоде:</label>
+                        <input type="number" id="totalCases" value="400" min="1">
+                    </div>
+                    <div class="field">
+                        <label>🔢 Проверено случаев по плановой выборке:</label>
+                        <input type="number" id="checkedCases" value="28" min="0">
+                        <div class="hint">% проверки = (проверено / всего) × 100%</div>
+                    </div>
+                    
+                    <div class="field">
+                        <label>⚠️ Были ли «критические» случаи? (летальные, жалобы, инвалидность):</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="critical" value="yes" > Да</label>
+                            <label><input type="radio" name="critical" value="no" checked> Нет</label>
+                        </div>
+                    </div>
+                    <div class="field" id="criticalCheckBlock" style="display: none;">
+                        <label>✔️ Все ли критические случаи включены в проверку (100%):</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="criticalAll" value="yes"> Да</label>
+                            <label><input type="radio" name="criticalAll" value="no" checked> Нет (нарушение)</label>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>👨‍⚕️ Стаж эксперта ≥ 10 лет?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="expStage" value="yes" checked> Да</label>
+                            <label><input type="radio" name="expStage" value="no"> Нет (нарушение 9.3)</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>🆔 Аккредитация эксперта (с 2026 действует)?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="accr" value="yes" checked> Да, аккредитация</label>
+                            <label><input type="radio" name="accr" value="no"> Нет / только сертификат (нарушение)</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>📋 Специальность эксперта соответствует профилю случаев?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="profile" value="yes" checked> Да</label>
+                            <label><input type="radio" name="profile" value="no"> Нет (грубое нарушение)</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>🌐 Эксперт есть в территориальном реестре?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="registry" value="yes" checked> Да</label>
+                            <label><input type="radio" name="registry" value="no"> Нет (нарушение)</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>💰 Код санкции, предъявленной СМО:</label>
+                        <select id="sanctionCode">
+                            <option value="9.1">9.1 — Невыявление дефектов</option>
+                            <option value="9.2">9.2 — Нарушение сроков</option>
+                            <option value="9.3">9.3 — Нарушение требований к эксперту</option>
+                            <option value="9.4">9.4 — Необоснованное снятие денег</option>
+                        </select>
+                    </div>
+                    <div class="field" id="code94extra" style="display: none;">
+                        <label>⚖️ Есть решение ТФОМС/суда в пользу клиники?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="court" value="yes"> Да (основание для отмены)</label>
+                            <label><input type="radio" name="court" value="no" checked> Нет</label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" id="checkBtn">Проверить обоснованность</button>
+                </div>
+            </div>
+            
+            <!-- РЕЗУЛЬТАТ -->
+            <div class="result-block" id="resultArea">
+                <div class="verdict" id="verdictText">⚡ Заполните поля и нажмите "Проверить"</div>
+                <div class="details" id="detailsText">Интерактивная оценка соблюдения процедур ЭКМП. Будут отмечены возможные нарушения СМО.</div>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: справочные таблицы и советы -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="emoji">📋</span>
+                    <h2>Справочник</h2>
+                </div>
+                <p><strong>Таблица 1. Санкции ТФОМС к СМО</strong></p>
+                <table>
+                    <tr><th>Код</th><th>Нарушение</th><th>Санкция</th></tr>
+                    <tr><td>9.1</td><td>Невыявление дефектов</td><td>−100% суммы + штраф 10%</td></tr>
+                    <tr><td>9.2</td><td>Нарушение сроков ЭКМП / передачи акта</td><td>Штраф от средств на ведение дела</td></tr>
+                    <tr><td>9.3</td><td>Нарушение требований к эксперту (стаж, аккредитация)</td><td>Штраф от средств на ведение дела</td></tr>
+                    <tr><td>9.4</td><td>Необоснованное снятие денег</td><td>Штраф 100% от необоснованно удержанной суммы</td></tr>
+                </table>
+                <p><strong>Таблица 2. Сроки ЭКМП</strong></p>
+                <table>
+                    <tr><th>Вид</th><th>Срок</th></tr>
+                    <tr><td>Плановая</td><td>≤ 1 месяца, не чаще 2 раз в год</td></tr>
+                    <tr><td>Внеплановая</td><td>≤ 1 месяца с поручения</td></tr>
+                    <tr><td>Мультидисциплинарная</td><td>≤ 40 рабочих дней</td></tr>
+                </table>
+                <p class="highlight">🔔 Акт должен быть вручен в течение 5 рабочих дней после завершения ЭКМП.</p>
+                
+                <details class="spoiler">
+                    <summary>📌 Требования к эксперту (таблица 3)</summary>
+                    <ul style="margin-top: 10px;">
+                        <li>Высшее образование (диплом)</li>
+                        <li><strong>Аккредитация</strong> (с 2026 сертификаты недействительны)</li>
+                        <li>Стаж ≥ 10 лет по специальности</li>
+                        <li>Подготовка по экспертной деятельности ОМС</li>
+                        <li>Включение в единый/территориальный реестр</li>
+                    </ul>
+                </details>
+                
+                <details class="spoiler">
+                    <summary>📏 Нормативы выборки</summary>
+                    <ul>
+                        <li><strong>Стационар:</strong> 5% законченных случаев (если нет оснований для увеличения)</li>
+                        <li><strong>Дневной стационар:</strong> 3%</li>
+                        <li><strong>Амбулаторно:</strong> 0,5%</li>
+                        <li><strong>Целевая (100%):</strong> летальные исходы, жалобы, внутрибольничные инфекции, первичный выход на инвалидность</li>
+                    </ul>
+                </details>
+                
+                <div class="footnote">
+                    <p>⭐ <strong>Совет:</strong> Всегда ставьте отметку о получении акта с датой. При отправке по почте храните конверт. Это докажет нарушение сроков СМО.</p>
+                    <p>📩 Если заключение не поступило в течение 10 рабочих дней после окончания срока ЭКМП, направьте сообщение в ТФОМС — это обязанность клиники.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // показ/скрытие доп. полей
+        const criticalRadios = document.querySelectorAll('input[name="critical"]');
+        const criticalBlock = document.getElementById('criticalCheckBlock');
+        const sanctionSelect = document.getElementById('sanctionCode');
+        const code94extra = document.getElementById('code94extra');
+        
+        function toggleCritical() {
+            const selected = document.querySelector('input[name="critical"]:checked');
+            if (selected && selected.value === 'yes') {
+                criticalBlock.style.display = 'block';
+            } else {
+                criticalBlock.style.display = 'none';
+            }
+        }
+        criticalRadios.forEach(r => r.addEventListener('change', toggleCritical));
+        toggleCritical();
+
+        function toggle94() {
+            code94extra.style.display = (sanctionSelect.value === '9.4') ? 'block' : 'none';
+        }
+        sanctionSelect.addEventListener('change', toggle94);
+        toggle94();
+
+        // вычисление рабочих дней (грубо: без учета праздников, только сб/вс исключаем)
+        function getWorkingDaysDiff(dateStart, dateEnd) {
+            if (!dateStart || !dateEnd) return null;
+            const start = new Date(dateStart);
+            const end = new Date(dateEnd);
+            if (start > end) return 0;
+            let count = 0;
+            const cur = new Date(start);
+            while (cur <= end) {
+                const day = cur.getDay();
+                if (day !== 0 && day !== 6) count++; // пн-пт
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count - 1; // разница между датами, не включая стартовый день? Считаем дни после завершения: если акт получили на следующий рабочий день — 1 рабочий день. 
+            // корректнее: разница в рабочих днях между датами, не включая начальную, но включая конечную. 
+            // используем простой подсчет рабочих дней между датами включительно? Для проверки: если завершение 10.03, получение 11.03 — прошёл 1 рабочий день. 
+            // в цикле мы считаем все дни от start до end включительно. вычтем 1, если start не считаем.
+        }
+
+        document.getElementById('checkBtn').addEventListener('click', function() {
+            const dateEnd = document.getElementById('dateEnd').value;
+            const dateReceive = document.getElementById('dateReceive').value;
+            const helpType = document.getElementById('helpType').value;
+            const totalCases = parseInt(document.getElementById('totalCases').value, 10) || 0;
+            const checkedCases = parseInt(document.getElementById('checkedCases').value, 10) || 0;
+            
+            const criticalYes = document.querySelector('input[name="critical"]:checked')?.value === 'yes';
+            const criticalAll = document.querySelector('input[name="criticalAll"]:checked')?.value === 'yes';
+            
+            const expStage = document.querySelector('input[name="expStage"]:checked')?.value === 'yes';
+            const accr = document.querySelector('input[name="accr"]:checked')?.value === 'yes';
+            const profile = document.querySelector('input[name="profile"]:checked')?.value === 'yes';
+            const registry = document.querySelector('input[name="registry"]:checked')?.value === 'yes';
+            
+            const sanction = sanctionSelect.value;
+            const courtDecision = document.querySelector('input[name="court"]:checked')?.value === 'yes';
+            
+            let violations = [];
+            let redFlags = 0;
+
+            // 1. сроки
+            if (dateEnd && dateReceive) {
+                const workingDays = getWorkingDaysDiff(dateEnd, dateReceive);
+                if (workingDays !== null && workingDays > 5) {
+                    violations.push('🔴 Нарушение срока передачи акта (>5 рабочих дней). Возможен штраф СМО по код 9.2.');
+                } else if (workingDays !== null) {
+                    // всё ok
+                } else {
+                    violations.push('⚠️ Некорректные даты для проверки сроков.');
+                }
+            } else {
+                violations.push('⚠️ Укажите даты для проверки сроков.');
+            }
+
+            // 2. выборка
+            let percent = (totalCases > 0) ? (checkedCases / totalCases * 100) : 0;
+            let limitPercent = 5; // стационар
+            if (helpType === 'day') limitPercent = 3;
+            else if (helpType === 'amb') limitPercent = 0.5;
+            
+            // если выбраны критические, они должны проверяться 100%
+            if (criticalYes && criticalAll === false) {
+                violations.push('🔴 Не все критические случаи (летальные, жалобы) включены в проверку — нарушение обязательной 100% выборки.');
+            }
+            // превышение лимита плановой выборки (грубо: если больше нормы и нет обоснования, но мы не знаем обоснование)
+            if (percent > limitPercent) {
+                violations.push(`🔴 Превышен норматив плановой выборки: ${percent.toFixed(1)}% при норме ${limitPercent}%. Если нет официального уведомления об ухудшении показателей, это нарушение (необоснованное расширение).`);
+            } else if (percent < limitPercent && !criticalYes) {
+                // можно не проверять если мало, но если не добрали — формально не нарушение, плановая может быть меньше.
+            }
+
+            // 3. Квалификация эксперта
+            if (!expStage) violations.push('🔴 Стаж эксперта менее 10 лет — нарушение (код 9.3).');
+            if (!accr) violations.push('🔴 У эксперта отсутствует действующая аккредитация (с 2026 требуется) — код 9.3.');
+            if (!profile) violations.push('🔴 Специальность эксперта не соответствует профилю оказанной помощи — грубое нарушение (код 9.3).');
+            if (!registry) violations.push('🔴 Эксперт отсутствует в территориальном реестре — нарушение (код 9.3).');
+
+            // 4. Санкция 9.4 особый случай
+            if (sanction === '9.4' && courtDecision) {
+                violations.push('⚖️ Имеется решение ТФОМС/суда в пользу клиники — это подтверждает необоснованность санкции (код 9.4).');
+            } else if (sanction === '9.4' && !courtDecision) {
+                violations.push('⚠️ Санкция 9.4 предъявлена, но пока нет решения в вашу пользу. Если вы докажете правоту, СМО оштрафуют.');
+            }
+
+            // если нет нарушений, но может быть несогласие с дефектами
+            let verdict = '';
+            let details = '';
+            if (violations.length === 0) {
+                verdict = '✅ Процедурных нарушений не обнаружено';
+                details = 'СМО соблюла сроки, требования к эксперту и объёмы выборки. Однако если вы не согласны с выявленными дефектами (коды 9.1/9.4), вы вправе обжаловать акт в ТФОМС или подготовить претензию.';
+            } else {
+                verdict = '⚠️ Есть основания полагать нарушения процедуры ЭКМП';
+                details = 'Обнаружены следующие несоответствия:\n• ' + violations.join('\n• ');
+                details += '\n\nРекомендуется обратиться в ТФОМС с заявлением об аннулировании результатов проверки и применении санкций к СМО. Приложите доказательства (копии актов, конверты, скриншоты реестров).';
+            }
+
+            // добавим по умолчанию, если нет дат
+            document.getElementById('verdictText').innerText = verdict;
+            document.getElementById('detailsText').innerHTML = details.replace(/\n/g, '<br>');
+        });
+    })();
+</script>
+
+<!-- Дополнительный блок "Если не получили акт" -->
+<div style="background: #e6f2ff; border-radius: 28px; padding: 20px 30px; margin-top: 25px; border: 1px solid #a0c6e9;">
+    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+        <span style="font-size: 3rem;">📢</span>
+        <div><strong style="font-size: 1.4rem;">Не получили заключение в течение 10 рабочих дней после завершения срока?</strong><br>
+        Медицинская организация обязана сообщить об этом в ТФОМС. Это повод для штрафа СМО за нарушение договора.</div>
+    </div>
+</div>
+</body>
+</html>
